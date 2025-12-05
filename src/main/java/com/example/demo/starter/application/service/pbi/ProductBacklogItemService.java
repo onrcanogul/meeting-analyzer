@@ -14,5 +14,5 @@ import java.util.UUID;
 public interface ProductBacklogItemService extends BaseService<ProductBacklogItem, ProductBacklogItemDto> {
     ServiceResponse<List<ProductBacklogItemDto>> getByMeeting(UUID meetingId);
     ServiceResponse<NoContent> send(UUID id, ProviderType providerType);
-    ServiceResponse<List<ProductBacklogItemDto>> analyzeAndCreate(MeetingDto meeting);
+    ServiceResponse<NoContent> analyzeAndCreate(MeetingDto meeting, UUID userId);
 }

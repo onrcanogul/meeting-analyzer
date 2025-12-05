@@ -2,15 +2,18 @@ package com.example.demo.starter.application.service.pbi.impl;
 
 import com.example.demo.starter.application.dto.meeting.MeetingDto;
 import com.example.demo.starter.application.dto.pbi.ProductBacklogItemDto;
+import com.example.demo.starter.application.dto.user.UserDto;
 import com.example.demo.starter.application.service.ai.AIService;
 import com.example.demo.starter.application.service.base.impl.BaseServiceImpl;
 import com.example.demo.starter.application.service.integration.issue.IssueIntegration;
 import com.example.demo.starter.application.service.integration.issue.impl.IntegrationResolver;
 import com.example.demo.starter.application.service.pbi.ProductBacklogItemService;
 import com.example.demo.starter.domain.entity.ProductBacklogItem;
+import com.example.demo.starter.domain.entity.User;
 import com.example.demo.starter.domain.enumeration.ProviderType;
 import com.example.demo.starter.infrastructure.exception.BadRequestException;
 import com.example.demo.starter.infrastructure.exception.NotFoundException;
+import com.example.demo.starter.infrastructure.repository.UserRepository;
 import com.example.demo.starter.infrastructure.util.response.NoContent;
 import com.example.demo.starter.infrastructure.util.response.ServiceResponse;
 import com.example.demo.starter.infrastructure.configuration.mapper.Mapper;
@@ -23,15 +26,20 @@ import java.util.UUID;
 @Service
 public class ProductBacklogItemServiceImpl extends BaseServiceImpl<ProductBacklogItem, ProductBacklogItemDto> implements ProductBacklogItemService {
     private final Mapper<ProductBacklogItem, ProductBacklogItemDto> mapper;
+    private final Mapper<User, UserDto> userMapper;
     private final ProductBacklogItemRepository repository;
     private final IntegrationResolver integrationResolver;
     private final AIService aiService;
-    public ProductBacklogItemServiceImpl(ProductBacklogItemRepository repository, Mapper<ProductBacklogItem, ProductBacklogItemDto> mapper, IntegrationResolver integrationResolver, AIService aiService) {
+    private final UserRepository userRepository;
+
+    public ProductBacklogItemServiceImpl(ProductBacklogItemRepository repository, Mapper<ProductBacklogItem, ProductBacklogItemDto> mapper, Mapper<User, UserDto> userMapper, IntegrationResolver integrationResolver, AIService aiService, UserRepository userRepository) {
         super(repository, mapper);
         this.mapper = mapper;
         this.repository = repository;
+        this.userMapper = userMapper;
         this.integrationResolver = integrationResolver;
         this.aiService = aiService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -55,11 +63,12 @@ public class ProductBacklogItemServiceImpl extends BaseServiceImpl<ProductBacklo
     }
 
     @Override
-    public ServiceResponse<List<ProductBacklogItemDto>> analyzeAndCreate(MeetingDto meeting) {
+    public ServiceResponse<NoContent> analyzeAndCreate(MeetingDto meeting, UUID userId) {
+        UserDto user = userMapper.toDto(userRepository.findById(userId).orElseThrow());
         List<ProductBacklogItemDto> backlogItems = aiService.analyzeBacklog(meeting).getData();
-        backlogItems.forEach(item -> item.setMeeting(meeting));
-        List<ProductBacklogItem> items = repository.saveAll(backlogItems.stream().map(mapper::toEntity).toList());
-        return ServiceResponse.success(items.stream().map(mapper::toDto).toList(), 200);
+        backlogItems.forEach(item -> { item.setMeeting(meeting); item.setUser(user); });
+        repository.saveAll(backlogItems.stream().map(mapper::toEntity).toList());
+        return ServiceResponse.success(200);
     }
 
     @Override

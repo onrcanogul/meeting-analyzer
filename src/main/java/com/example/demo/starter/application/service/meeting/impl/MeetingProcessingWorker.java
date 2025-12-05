@@ -59,7 +59,7 @@ public class MeetingProcessingWorker {
                     List.of()
             );
 
-            productBacklogItemService.analyzeAndCreate(dto);
+            productBacklogItemService.analyzeAndCreate(dto, user.getId());
 
             meeting.setStatus(MeetingStatus.UPLOADED);
             meetingRepository.save(meeting);
