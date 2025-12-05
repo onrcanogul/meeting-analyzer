@@ -4,20 +4,18 @@ import com.example.demo.starter.application.dto.meeting.MeetingDto;
 import com.example.demo.starter.application.service.audio.AudioService;
 import com.example.demo.starter.application.service.auth.CustomUserDetailsService;
 import com.example.demo.starter.application.service.base.impl.BaseServiceImpl;
-import com.example.demo.starter.application.service.integration.issue.impl.IntegrationResolver;
+import com.example.demo.starter.application.service.meeting.MeetingProcessingJobService;
 import com.example.demo.starter.application.service.meeting.MeetingService;
 import com.example.demo.starter.application.service.pbi.ProductBacklogItemService;
 import com.example.demo.starter.domain.entity.Meeting;
 import com.example.demo.starter.domain.entity.Team;
 import com.example.demo.starter.domain.enumeration.MeetingStatus;
 import com.example.demo.starter.domain.enumeration.ProviderType;
-import com.example.demo.starter.infrastructure.repository.IntegrationTokenRepository;
 import com.example.demo.starter.infrastructure.util.response.ServiceResponse;
 import com.example.demo.starter.infrastructure.configuration.mapper.Mapper;
 import com.example.demo.starter.infrastructure.exception.NotFoundException;
 import com.example.demo.starter.infrastructure.repository.MeetingRepository;
 import com.example.demo.starter.infrastructure.repository.TeamRepository;
-import com.example.demo.starter.infrastructure.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,13 +32,13 @@ public class MeetingServiceImpl extends BaseServiceImpl<Meeting, MeetingDto> imp
     private final ProductBacklogItemService productBacklogItemService;
     private final CustomUserDetailsService userService;
     private final TeamRepository teamRepository;
-    private final IntegrationTokenRepository integrationTokenRepository;
-    private final IntegrationResolver integrationResolver;
+    private final MeetingProcessingJobService jobProcessingService;
+
 
     public MeetingServiceImpl(MeetingRepository repository,
                               Mapper<Meeting, MeetingDto> mapper,
-                              AudioService audioService, ProductBacklogItemService productBacklogItemService, CustomUserDetailsService userService, UserRepository userRepository,
-                              TeamRepository teamRepository, IntegrationTokenRepository integrationTokenRepository, IntegrationResolver integrationResolver
+                              AudioService audioService, ProductBacklogItemService productBacklogItemService, CustomUserDetailsService userService,
+                              TeamRepository teamRepository, MeetingProcessingJobService jobProcessingService
     ) {
         super(repository, mapper);
         this.mapper = mapper;
@@ -49,8 +47,7 @@ public class MeetingServiceImpl extends BaseServiceImpl<Meeting, MeetingDto> imp
         this.productBacklogItemService = productBacklogItemService;
         this.userService = userService;
         this.teamRepository = teamRepository;
-        this.integrationTokenRepository = integrationTokenRepository;
-        this.integrationResolver = integrationResolver;
+        this.jobProcessingService = jobProcessingService;
     }
 
     @Override
@@ -102,10 +99,10 @@ public class MeetingServiceImpl extends BaseServiceImpl<Meeting, MeetingDto> imp
                 .build();
 
         Meeting createdMeeting = repository.save(meeting);
-        MeetingDto dto = mapper.toDto(createdMeeting);
-        dto.setBacklogItems(productBacklogItemService.analyzeAndCreate(dto).getData());
 
-        return ServiceResponse.success(dto, 201);
+        jobProcessingService.create(createdMeeting.getId());
+
+        return ServiceResponse.success(mapper.toDto(createdMeeting), 201);
     }
 
     @Override
@@ -126,10 +123,10 @@ public class MeetingServiceImpl extends BaseServiceImpl<Meeting, MeetingDto> imp
                 .build();
 
         Meeting createdMeeting = repository.save(meeting);
-        MeetingDto dto = mapper.toDto(createdMeeting);
-        dto.setBacklogItems(productBacklogItemService.analyzeAndCreate(dto).getData());
 
-        return ServiceResponse.success(dto, 201);
+        jobProcessingService.create(createdMeeting.getId());
+
+        return ServiceResponse.success(mapper.toDto(createdMeeting), 201);
     }
 
     @Override
@@ -144,7 +141,6 @@ public class MeetingServiceImpl extends BaseServiceImpl<Meeting, MeetingDto> imp
 
         Meeting savedMeeting = repository.save(meeting);
         return ServiceResponse.success(mapper.toDto(savedMeeting), 200);
-
     }
 
     @Override
