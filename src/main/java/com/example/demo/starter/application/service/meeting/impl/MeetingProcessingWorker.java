@@ -38,8 +38,6 @@ public class MeetingProcessingWorker {
 
         MeetingProcessingJob job = optionalJob.get();
 
-        UserDto user = userMapper.toDto(userRepository.findById(job.getUserId()).orElseThrow());
-
         try {
             job.setState(ProcessingState.PBI_GENERATION);
             job.setProgress(25);
@@ -49,17 +47,7 @@ public class MeetingProcessingWorker {
                     () -> new RuntimeException("Meeting not found")
             );
 
-            MeetingDto dto = new MeetingDto(
-                    meeting.getTitle(),
-                    meeting.getTranscript(),
-                    meeting.getStatus(),
-                    user,
-                    meeting.getRepositoryId(),
-                    meeting.getRepositoryProvider(),
-                    List.of()
-            );
-
-            productBacklogItemService.analyzeAndCreate(dto, user.getId());
+            productBacklogItemService.analyzeAndCreate(meeting, job.getUserId());
 
             meeting.setStatus(MeetingStatus.UPLOADED);
             meetingRepository.save(meeting);

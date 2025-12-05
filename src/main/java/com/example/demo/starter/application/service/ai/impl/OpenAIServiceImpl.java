@@ -1,9 +1,9 @@
 package com.example.demo.starter.application.service.ai.impl;
 
-import com.example.demo.starter.application.dto.meeting.MeetingDto;
 import com.example.demo.starter.application.dto.pbi.ProductBacklogItemDto;
 import com.example.demo.starter.application.service.ai.OpenAIService;
 import com.example.demo.starter.application.service.auth.CustomUserDetailsService;
+import com.example.demo.starter.domain.entity.Meeting;
 import com.example.demo.starter.infrastructure.util.response.ServiceResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -38,7 +38,7 @@ public class OpenAIServiceImpl implements OpenAIService {
     private String openAiApiUrl;
 
     @Override
-    public ServiceResponse<List<ProductBacklogItemDto>> analyzeBacklog(MeetingDto meeting) {
+    public ServiceResponse<List<ProductBacklogItemDto>> analyzeBacklog(Meeting meeting) {
         try {
             String prompt = buildPrompt(meeting);
 
@@ -61,7 +61,7 @@ public class OpenAIServiceImpl implements OpenAIService {
         }
     }
 
-    private String buildPrompt(MeetingDto meeting) {
+    private String buildPrompt(Meeting meeting) {
         try {
             Map<String, Object> inner = new HashMap<>();
             inner.put("title", meeting.getTitle());

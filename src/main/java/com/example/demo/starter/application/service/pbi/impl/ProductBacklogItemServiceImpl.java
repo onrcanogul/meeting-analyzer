@@ -8,6 +8,7 @@ import com.example.demo.starter.application.service.base.impl.BaseServiceImpl;
 import com.example.demo.starter.application.service.integration.issue.IssueIntegration;
 import com.example.demo.starter.application.service.integration.issue.impl.IntegrationResolver;
 import com.example.demo.starter.application.service.pbi.ProductBacklogItemService;
+import com.example.demo.starter.domain.entity.Meeting;
 import com.example.demo.starter.domain.entity.ProductBacklogItem;
 import com.example.demo.starter.domain.entity.User;
 import com.example.demo.starter.domain.enumeration.ProviderType;
@@ -63,11 +64,11 @@ public class ProductBacklogItemServiceImpl extends BaseServiceImpl<ProductBacklo
     }
 
     @Override
-    public ServiceResponse<NoContent> analyzeAndCreate(MeetingDto meeting, UUID userId) {
-        UserDto user = userMapper.toDto(userRepository.findById(userId).orElseThrow());
-        List<ProductBacklogItemDto> backlogItems = aiService.analyzeBacklog(meeting).getData();
+    public ServiceResponse<NoContent> analyzeAndCreate(Meeting meeting, UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        List<ProductBacklogItem> backlogItems = aiService.analyzeBacklog(meeting).getData().stream().map(mapper::toEntity).toList();
         backlogItems.forEach(item -> { item.setMeeting(meeting); item.setUser(user); });
-        repository.saveAll(backlogItems.stream().map(mapper::toEntity).toList());
+        repository.saveAll(backlogItems);
         return ServiceResponse.success(200);
     }
 
