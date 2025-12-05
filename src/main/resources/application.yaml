@@ -1,6 +1,6 @@
 spring:
   application:
-    name: BIM437-PROJECT
+    name: Meeting Analyzer
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
