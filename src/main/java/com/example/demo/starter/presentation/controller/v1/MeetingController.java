@@ -5,7 +5,6 @@ import com.example.demo.starter.application.dto.meeting.MeetingProcessingJobDto;
 import com.example.demo.starter.application.service.meeting.MeetingProcessingJobService;
 import com.example.demo.starter.application.service.meeting.MeetingService;
 import com.example.demo.starter.domain.enumeration.ProviderType;
-import com.example.demo.starter.infrastructure.repository.MeetingProcessingRepository;
 import com.example.demo.starter.infrastructure.util.response.NoContent;
 import com.example.demo.starter.infrastructure.util.response.ServiceResponse;
 import com.example.demo.starter.presentation.controller.base.BaseController;
