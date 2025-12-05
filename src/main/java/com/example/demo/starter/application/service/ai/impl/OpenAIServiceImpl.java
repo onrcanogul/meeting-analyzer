@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,16 +63,16 @@ public class OpenAIServiceImpl implements OpenAIService {
 
     private String buildPrompt(MeetingDto meeting) {
         try {
-            String meetingJson = objectMapper.writeValueAsString(Map.of(
-                    "meeting", Map.of(
-                            "title", meeting.getTitle(),
-                            "status", meeting.getStatus().name(),
-                            "user", Map.of(
-                                    "id", userService.getCurrentUserId()
-                            ),
-                            "transcript", meeting.getTranscript()
-                    )
-            ));
+            Map<String, Object> inner = new HashMap<>();
+            inner.put("title", meeting.getTitle());
+            inner.put("status", meeting.getStatus() != null ? meeting.getStatus().name() : null);
+            inner.put("transcript", meeting.getTranscript());
+
+            Map<String, Object> outer = new HashMap<>();
+            outer.put("meeting", inner);
+
+            String meetingJson = objectMapper.writeValueAsString(outer);
+
 
             return """
             You are an AI assistant that analyzes software development meetings
