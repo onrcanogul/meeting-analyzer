@@ -1,13 +1,17 @@
 package com.example.demo.starter.presentation.controller.v1;
 
 import com.example.demo.starter.application.dto.meeting.MeetingDto;
+import com.example.demo.starter.application.dto.meeting.MeetingProcessingJobDto;
+import com.example.demo.starter.application.service.meeting.MeetingProcessingJobService;
 import com.example.demo.starter.application.service.meeting.MeetingService;
 import com.example.demo.starter.domain.enumeration.ProviderType;
+import com.example.demo.starter.infrastructure.repository.MeetingProcessingRepository;
 import com.example.demo.starter.infrastructure.util.response.NoContent;
 import com.example.demo.starter.infrastructure.util.response.ServiceResponse;
 import com.example.demo.starter.presentation.controller.base.BaseController;
 import com.example.demo.starter.presentation.model.CreateWithTranscriptRequestModel;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,12 +22,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/meeting")
+@RequiredArgsConstructor
 public class MeetingController extends BaseController {
     private final MeetingService meetingService;
+    private final MeetingProcessingJobService meetingProcessingJobService;
 
-    public MeetingController(MeetingService meetingService) {
-        this.meetingService = meetingService;
-    }
 
     @GetMapping
     @Operation(summary = "-TEST- Get All Meeting Services")
@@ -41,6 +44,12 @@ public class MeetingController extends BaseController {
     @Operation(summary = "-TEST- Get Meeting By Id")
     public ResponseEntity<ServiceResponse<MeetingDto>> get(@PathVariable UUID id) {
         return controllerResponse(meetingService.getById(id));
+    }
+
+    @GetMapping("/job/user")
+    @Operation(summary = "Get Meeting User")
+    public ResponseEntity<ServiceResponse<List<MeetingProcessingJobDto>>> getJobsByUser() {
+        return controllerResponse(meetingProcessingJobService.findByUserId());
     }
 
     @PostMapping

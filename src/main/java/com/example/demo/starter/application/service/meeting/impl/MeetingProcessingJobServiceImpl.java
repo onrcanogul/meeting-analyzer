@@ -23,7 +23,8 @@ public class MeetingProcessingJobServiceImpl implements MeetingProcessingJobServ
     private final Mapper<MeetingProcessingJob, MeetingProcessingJobDto> mapper;
 
     @Override
-    public ServiceResponse<List<MeetingProcessingJobDto>> findByUserId(UUID userId) {
+    public ServiceResponse<List<MeetingProcessingJobDto>> findByUserId() {
+        UUID userId = userService.getCurrentUserId();
         var list = repository.findByUserId(userId);
         var dtoList = list.stream().map(mapper::toDto).toList();
         return ServiceResponse.success(dtoList, 200);

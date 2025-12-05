@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MeetingProcessingJobService {
-    ServiceResponse<List<MeetingProcessingJobDto>> findByUserId(UUID userId);
+    ServiceResponse<List<MeetingProcessingJobDto>> findByUserId();
     void create(UUID meetingId);
 }

@@ -3,6 +3,7 @@ package com.example.demo.starter.infrastructure.configuration.mapper;
 import com.example.demo.starter.application.dto.base.BaseDto;
 import com.example.demo.starter.application.dto.integration.IntegrationTokenDto;
 import com.example.demo.starter.application.dto.meeting.MeetingDto;
+import com.example.demo.starter.application.dto.meeting.MeetingProcessingJobDto;
 import com.example.demo.starter.application.dto.pbi.ProductBacklogItemDto;
 import com.example.demo.starter.application.dto.team.TeamDto;
 import com.example.demo.starter.application.dto.user.UserDto;
@@ -31,4 +32,6 @@ public class MapperConfiguration {
     public Mapper<Team, TeamDto> teamMapper() { return new Mapper<>(Team.class, TeamDto.class); }
     @Bean
     public Mapper<IntegrationToken, IntegrationTokenDto> tokenMapper() { return new Mapper<>(IntegrationToken.class, IntegrationTokenDto.class); }
+    @Bean
+    public Mapper<MeetingProcessingJob, MeetingProcessingJobDto> jobMapper() { return new Mapper<>(MeetingProcessingJob.class, MeetingProcessingJobDto.class); }
 }
