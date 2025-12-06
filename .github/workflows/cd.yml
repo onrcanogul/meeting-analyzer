@@ -8,17 +8,16 @@ on:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: >
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'prod'
+      }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: List files before SCP
-        run: ls -la
 
       - name: Copy docker-compose.prod.yml
         uses: appleboy/scp-action@v0.1.4
@@ -27,8 +26,8 @@ jobs:
           username: root
           key: ${{ secrets.DEPLOY_KEY }}
           port: 22
-          source: ./docker-compose.prod.yml
-          target: /opt/437
+          source: "./docker-compose.prod.yml"
+          target: "/opt/437"
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -39,10 +38,13 @@ jobs:
           port: 22
           script: |
             cd /opt/437
-            echo "Stop running containers..."
+            echo "Stop running services..."
             docker compose -f docker-compose.prod.yml down --remove-orphans || true
-            echo "Pull latest image..."
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/437-api:latest
-            echo "Start new containers..."
-            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
-            echo "Deployment succeeded!"
+            
+            echo "Pulling PROD image..."
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/437-api:prod
+            
+            echo "Starting new containers..."
+            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+            
+            echo "Production deploy complete!"
