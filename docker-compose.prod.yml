@@ -40,13 +40,6 @@ services:
       ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
 
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    restart: always
-    command: --interval 30 --cleanup 437-api
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
   pgdata:
