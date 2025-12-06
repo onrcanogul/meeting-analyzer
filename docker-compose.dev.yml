@@ -22,10 +22,12 @@ services:
       - 437-net
 
   backend:
-    image: onrcanogul/437-api:latest
     build:
+      context: .
+      dockerfile: Dockerfile
       args:
         ENABLE_DEBUG: "true"
+    image: onrcanogul/437-api:latest
     ports:
       - "8080:8080"
       - "5005:5005"
