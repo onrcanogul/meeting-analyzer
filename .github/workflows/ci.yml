@@ -3,8 +3,9 @@ name: CI - Build & Push Docker Image
 on:
   push:
     branches:
-      - master
       - main
+      - master
+      - prod
   pull_request:
 
 jobs:
@@ -41,11 +42,20 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - name: Determine Tag
+        id: vars
+        run: |
+          if [[ "${GITHUB_REF##*/}" == "prod" ]]; then
+            echo "tag=prod" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/437-api:latest .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/437-api:${{ steps.vars.outputs.tag }} .
 
       - name: Push Docker Image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/437-api:latest
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/437-api:${{ steps.vars.outputs.tag }}
 
       - name: CI completed
-        run: echo "CI pipeline finished successfully!"
+        run: echo "CI pipeline finished successfully with tag = ${{ steps.vars.outputs.tag }}!"
